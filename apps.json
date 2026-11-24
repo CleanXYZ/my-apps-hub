@@ -50,5 +50,19 @@
     "tags": [
       "생활"
     ]
+  },
+  {
+    "id": "dictate",
+    "name": "음성 받아쓰기",
+    "summary": "말하면 글이 커서 자리에 들어가는 Windows 프로그램. Whisper를 내 컴퓨터에서 돌린다",
+    "kind": "program",
+    "status": "active",
+    "repo": "CleanXYZ/dictate",
+    "workOn": "local",
+    "localReason": "마이크와 NVIDIA 그래픽(CUDA)이 있는 내 컴퓨터에서만 돈다",
+    "run": "run.bat",
+    "tags": [
+      "도구"
+    ]
   }
 ]
