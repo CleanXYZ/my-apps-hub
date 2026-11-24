@@ -5,7 +5,7 @@ const KIND_LABEL = { page: 'Page', worker: 'Worker', program: 'Program', app: 'A
 const STATUS_LABEL = { active: '사용 중', paused: '보류', retired: '폐기' };
 const TABS = [['all', '전체'], ['active', '사용 중'], ['paused', '보류'], ['retired', '폐기']];
 
-const state = { apps: [], status: {}, generatedAt: null, tab: 'all', query: '', open: new Set() };
+const state = { apps: [], status: {}, generatedAt: null, tab: 'all', query: '', open: new Set(), asking: null };
 
 // ── 작은 도우미 ─────────────────────────────────────────────
 function el(tag, attrs = {}, ...children) {
@@ -56,22 +56,71 @@ async function copy(text, msg) {
 }
 
 // ── 버튼 ───────────────────────────────────────────────────
-export function claudePrompt(app) {
+export function claudePrompt(app, task) {
+  const head = `할 일: ${task.trim()}\n\n`;
   if (app.workOn === 'local') {
-    return [
-      `${app.repo} 작업이야. 내 컴퓨터에서 해야 하는 앱이다.`,
+    return head + [
+      `저장소: ${app.repo} (내 컴퓨터에서 해야 하는 앱이다)`,
       `이유: ${app.localReason || '(적혀 있지 않음)'}`,
       '내 컴퓨터의 앱 폴더를 연결할게. 먼저 git pull로 최신을 받아줘.',
       'CLAUDE.md와 README.md를 읽고, 끝나면 커밋하고 push해줘.',
-      '할 일: ',
     ].join('\n');
   }
-  return [
-    `${app.repo} 저장소 작업이야.`,
+  return head + [
+    `저장소: ${app.repo}`,
     '저장소를 받아서 CLAUDE.md와 README.md를 먼저 읽어줘.',
     '끝나면 main에 push해줘. 배포는 자동으로 된다.',
-    '할 일: ',
   ].join('\n');
+}
+
+// "Claude에게 맡기기" 입력 칸. 쓰는 동안 화면을 다시 그리지 않는다 (글자가 지워지지 않게).
+function askPanel(app) {
+  const key = `draft:${app.id}`;
+  const local = app.workOn === 'local';
+  const box = el('textarea', {
+    class: 'ask-text', rows: '3',
+    placeholder: '무엇을 맡길까요? 예: 설정 화면 맨 아래에 앱 버전을 보여줘',
+  });
+  box.value = safeGet(key) || '';
+
+  const copyBtn = el('button', { class: 'btn' }, '복사');
+  const goBtn = !local && el('button', { class: 'btn pri' }, '복사하고 Claude 열기');
+  const sync = () => {
+    const empty = !box.value.trim();
+    copyBtn.disabled = empty;
+    if (goBtn) goBtn.disabled = empty;
+  };
+  sync();
+  box.addEventListener('input', () => { safeSet(key, box.value); sync(); });
+
+  const doCopy = async (open) => {
+    if (!box.value.trim()) { box.focus(); return; }
+    await copy(claudePrompt(app, box.value),
+      local ? '복사했어요. Claude 데스크톱 앱에 붙여 넣고 앱 폴더를 연결하세요' : '복사했어요. Claude에 붙여 넣고 보내세요');
+    if (open) {
+      window.open('https://claude.ai/code', '_blank', 'noopener');
+      safeSet(key, '');
+      state.asking = null;
+      render();
+    }
+  };
+  copyBtn.addEventListener('click', () => doCopy(false));
+  if (goBtn) goBtn.addEventListener('click', () => doCopy(true));
+  box.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doCopy(!local); }
+    if (e.key === 'Escape') { state.asking = null; render(); }
+  });
+
+  return el('div', { class: 'ask' },
+    box,
+    el('div', { class: 'ask-row' },
+      goBtn, copyBtn,
+      el('button', { class: 'btn ghost', onclick: () => { state.asking = null; render(); } }, '닫기'),
+      el('span', { class: 'muted' }, local
+        ? 'Ctrl+Enter 복사 · 내 컴퓨터 작업 앱이라 Claude 데스크톱 앱에서 한다'
+        : 'Ctrl+Enter 복사하고 열기 · 쓰던 글은 이 브라우저에 남는다'),
+    ),
+  );
 }
 
 function localButton(app) {
@@ -94,7 +143,11 @@ function buildButtons(app) {
   const r = app.repo;
   const local = app.workOn === 'local';
   return [
-    el('button', { class: 'btn pri', onclick: () => copy(claudePrompt(app), '시작 문장을 복사했어요. Claude에 붙여 넣으세요') }, 'Claude에게 맡기기'),
+    el('button', { class: 'btn pri', 'aria-expanded': String(state.asking === app.id), onclick: () => {
+      state.asking = state.asking === app.id ? null : app.id;
+      render();
+      document.querySelector('.ask-text')?.focus();
+    } }, 'Claude에게 맡기기'),
     app.deploy && el('a', { class: 'btn', href: `https://github.com/${r}/actions/workflows/deploy.yml`, target: '_blank', rel: 'noopener' }, '새 버전 배포'),
     app.release && el('a', { class: 'btn', href: `https://github.com/${r}/actions/workflows/${app.release.workflow}`, target: '_blank', rel: 'noopener' }, '새 버전 빌드'),
     app.release && el('a', { class: 'btn', href: `https://github.com/${r}/releases/latest`, target: '_blank', rel: 'noopener' }, '설치 파일 받기'),
@@ -170,6 +223,7 @@ function card(app) {
         render();
       } }, isOpen ? '접기 ▲' : '자세히 보기 ▼'),
     ),
+    state.asking === app.id && askPanel(app),
     isOpen && detail(app, st),
   );
 }

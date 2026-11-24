@@ -14,6 +14,8 @@
 - 비공개 저장소도 커밋 메시지와 이슈 제목을 대시보드에 보여 준다.
 - 앱별 할 일은 각 앱 저장소의 GitHub Issues에 적는다.
 - 카드 버튼은 Claude 중심이다. 직접 편집 버튼(github.dev, Codespaces)은 두지 않는다.
+- "Claude에게 맡기기"는 카드 안에 할 일 입력 칸을 연다. 할 일을 맨 위에 둔 문장을 복사한다. 클라우드 앱은 "복사하고 Claude 열기"로 claude.ai/code를 연다.
+- 웹의 Claude는 브랜치나 PR 없이 `main`에 바로 push한다 (사용자가 정했다). 테스트가 통과해야 배포된다. 문제가 생기면 `git revert`로 되돌린다.
 - Cloudflare 앱은 main에 push하면 자동 배포하고, `workflow_dispatch` 버튼으로도 배포한다.
 - 앱 추가는 지금은 Claude가 한다. 절차가 굳으면 Node 명령어 도구 `hub add`로 만든다.
 
