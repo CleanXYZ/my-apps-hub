@@ -69,6 +69,8 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - **Secrets를 먼저 넣고 나서 push한다.** `gh repo create --source .`(push 없이) → `gh secret set` → `git push -u origin main`
 - **Cloudflare 토큰**: "Cloudflare Workers 편집" 정책. 영역 정책은 workers.dev만 쓰면 지워도 된다. 계정 정책은 내 계정을 골라야 한다. IP 필터는 비운다.
 - **폴더 이름이 한글이거나 공백이 있으면** 저장소 id는 짧은 영어로 정한다. 폴더 이름은 바꾸지 않아도 된다.
+- **새 Worker에 비밀값을 넣을 때는 배포를 먼저 한다.** wrangler-action의 `secrets:`는 명령보다 먼저 돌아서, 아직 없는 Worker에는 실패한다. 배포 단계와 비밀값 단계를 나눈다 (worker.yml 참고).
+- **`package.json`이 없는 폴더**에서 wrangler-action은 예전 wrangler(3.90)를 깐다. `wranglerVersion`을 적어 둔다.
 - **Secrets만 고쳤으면** 실패한 배포를 `gh run rerun --failed -R CleanXYZ/<id>`로 다시 돌린다.
 
 ## 바뀐 기록
