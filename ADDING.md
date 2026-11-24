@@ -82,3 +82,4 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - v0.2 (2026-11-24): commute-bus 첫 배포에서 계정 ID 오류(7003)와 PowerShell 실행 정책을 겪고 "자주 막히는 것"을 만들었다. 템플릿을 Node 22, checkout@v5, setup-node@v5로 올렸다.
 - v0.2 (2026-11-24): dictate(음성 받아쓰기) 등록. 폴더 이름이 한글과 공백이라 저장소 id는 영어(`dictate`)로 정했다. 한 저장소에 Python(지금 쓰는 것)과 `dictate-rs/`(옮기는 중) 두 버전을 둔다. dictate-rs README가 없는 release.yml을 설명하고 있어서 "아직 없다"로 고쳤다.
 - v0.2 (2026-11-24): 모든 Cloudflare 배포를 wrangler-action@v4로 올렸다 (Node 20 경고 해결).
+- v0.2 (2026-11-24): pages.yml을 upload-pages-artifact@v5, deploy-pages@v5로, qa-shot release.yml을 checkout@v5, setup-node@v5, Node 22로 올렸다. 이제 Node 20 경고가 나오는 곳은 남은 외부 부품(tauri-action 등)뿐이다.
