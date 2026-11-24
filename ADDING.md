@@ -1,4 +1,4 @@
-# 앱 추가 절차 (v0.2)
+# 앱 추가 절차 (v0.3)
 
 Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 앱을 추가할 때마다 맨 아래 "바뀐 기록"에 예외와 고친 점을 적는다.
@@ -31,7 +31,7 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
    - `.github` 폴더는 원격 도구로 쓸 수 없다. `_setup/`에 넣고 사용자가 명령으로 옮긴다.
 6. **`apps.json`에 한 줄을 더한다.**
    - 같은 `id`가 있으면 덮어쓰지 않고 사용자에게 묻는다.
-   - 내 컴퓨터에서만 작업할 수 있으면 `workOn: "local"`과 `localReason`을 적는다.
+   - 앱 종류에 맞게 `workOn`을 정한다. 데스크톱 앱은 `desktop`과 `checks`를 적는다. GitHub 빌드도 안 되는 앱만 `local`과 `localReason`을 적는다.
 7. **`README.md`와 `CLAUDE.md`를 쓴다.** 이 단계는 늘 Claude가 한다.
    - `templates/README.md`, `templates/CLAUDE.md`를 바탕으로 코드를 읽고 채운다.
 
@@ -47,7 +47,7 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
   "repo": "CleanXYZ/coupon-page",
   "url": "https://coupon-page.pages.dev",
   "deploy": { "target": "cf-pages", "project": "coupon-page" },
-  "workOn": "cloud",
+  "workOn": "web",
   "run": "npm run dev",
   "envNames": ["COUPON_API_KEY"],
   "tags": ["이벤트"]
@@ -57,7 +57,8 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - `kind`: `page` | `worker` | `program` | `app`
 - `status`: `active`(사용 중) | `paused`(보류) | `retired`(폐기)
 - `release`: 설치 파일을 만드는 앱만. 허브에 "새 버전 빌드", "설치 파일 받기" 단추가 생긴다
-- `workOn`: `cloud`(어디서나 Claude에게 맡김) | `local`(내 컴퓨터 필요)
+- `workOn`: `web`(웹 앱, push하면 배포) | `desktop`(데스크톱 앱, 고치기는 어디서나, 확인은 GitHub 빌드 설치 파일로) | `local`(빌드와 실행 모두 내 컴퓨터에서만)
+- `checks`: Claude가 직접 확인 못 하는 것 (예: `["캡처", "트레이"]`). 맡기기 문장에 "확인 순서를 적어 달라"가 붙는다
 - `envNames`: 키 **이름만**. 값은 절대 넣지 않는다. 이 파일은 공개된다.
 
 ## 자주 막히는 것
@@ -89,3 +90,4 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - v0.2 (2026-11-24): pages.yml을 upload-pages-artifact@v5, deploy-pages@v5로, qa-shot release.yml을 checkout@v5, setup-node@v5, Node 22로 올렸다. 이제 Node 20 경고가 나오는 곳은 남은 외부 부품(tauri-action 등)뿐이다.
 - v0.2 (2026-11-24): dictate는 GitHub에 이미 있던 저장소(Rust, 더 새 코드, 빌드 자동화)였다. 바탕화면에서 새로 `git init`해서 사본이 둘이 됐다. GitHub 쪽을 기준으로 Python 버전을 `python/`에 넣어 합쳤다. 빌드가 30분짜리라 `main` push 때는 돌지 않게 고쳤다. 4단계에 "이미 있는지 먼저 확인"을 더했다.
 - v0.2 (2026-11-24): mvpbest 등록. 원본이 없어 배포본에서 되찾았다 (React 빌드 파일, 원래 JSX 없음). Pages Functions(`/api/mvp-data`, KV `MVP_KV`의 키 `shared-data`)를 같은 모양으로 새로 만들었다.
+- v0.3 (2026-11-24): workOn을 web / desktop / local 세 가지로 나눴다 (cloud → web). qa-shot과 dictate는 desktop으로 옮기고 checks를 적었다.

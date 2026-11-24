@@ -45,7 +45,7 @@ async function collectOne(gh, app) {
     lastCommit: recentCommits[0] ? { date: recentCommits[0].date, message: recentCommits[0].message } : null,
     recentCommits,
     openIssues: openIssues.length,
-    issues: openIssues.map((i) => ({ number: i.number, title: i.title, url: i.html_url })),
+    issues: openIssues.map((i) => ({ number: i.number, title: i.title, url: i.html_url, body: (i.body || '').slice(0, 1000) })),
     lastDeploy: run
       ? {
           result: run.status !== 'completed' ? 'running' : run.conclusion === 'success' ? 'success' : 'failure',

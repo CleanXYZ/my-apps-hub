@@ -7,7 +7,7 @@
     "status": "active",
     "repo": "CleanXYZ/my-apps-hub",
     "url": "https://cleanxyz.github.io/my-apps-hub/",
-    "workOn": "cloud",
+    "workOn": "web",
     "run": "npx serve .",
     "tags": [
       "허브"
@@ -23,11 +23,17 @@
     "release": {
       "workflow": "release.yml"
     },
-    "workOn": "local",
-    "localReason": "Tauri(Rust) Windows 앱이라 내 컴퓨터에서 빌드하고 실행한다",
+    "workOn": "desktop",
     "run": "npm run tauri dev",
     "tags": [
       "qa"
+    ],
+    "checks": [
+      "캡처",
+      "트레이",
+      "단축키",
+      "클립보드",
+      "설치 파일 실행"
     ]
   },
   {
@@ -42,7 +48,7 @@
       "target": "cf-worker",
       "project": "commute-bus"
     },
-    "workOn": "cloud",
+    "workOn": "web",
     "run": "npm run dev",
     "envNames": [
       "GBIS_KEY"
@@ -61,11 +67,17 @@
     "release": {
       "workflow": "release.yml"
     },
-    "workOn": "local",
-    "localReason": "마이크와 NVIDIA 그래픽(CUDA)이 있는 내 컴퓨터에서만 돈다",
+    "workOn": "desktop",
     "run": "python\\run.bat",
     "tags": [
       "도구"
+    ],
+    "checks": [
+      "마이크 입력",
+      "받아쓰기 결과",
+      "단축키",
+      "트레이",
+      "설치 파일 실행"
     ]
   },
   {
@@ -80,7 +92,7 @@
       "target": "cf-pages",
       "project": "mvpbest"
     },
-    "workOn": "cloud",
+    "workOn": "web",
     "run": "npx wrangler pages dev public",
     "tags": [
       "메이플"

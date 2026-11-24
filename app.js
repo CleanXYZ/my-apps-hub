@@ -58,72 +58,137 @@ async function copy(text, msg) {
   catch { window.prompt('복사해서 쓰세요', text); }
 }
 
-// ── 버튼 ───────────────────────────────────────────────────
-export function claudePrompt(app, task) {
-  const head = `할 일: ${task.trim()}\n\n`;
-  if (app.workOn === 'local') {
-    return head + [
-      `저장소: ${app.repo} (내 컴퓨터에서 해야 하는 앱이다)`,
-      `이유: ${app.localReason || '(적혀 있지 않음)'}`,
-      '내 컴퓨터의 앱 폴더를 연결할게. 먼저 git pull로 최신을 받아줘.',
-      'CLAUDE.md와 README.md를 읽고, 끝나면 커밋하고 push해줘.',
-    ].join('\n');
+// ── Claude에게 맡기기 ─────────────────────────────────────────
+// 맡기는 곳: web = 웹의 Claude(claude.ai/code), desktop = Claude 데스크톱 앱(폴더 연결).
+// 앱 종류(apps.json workOn): web = 웹 앱, desktop = 데스크톱 앱 + GitHub 빌드, local = 내 컴퓨터 전용.
+// 계획서 "허브 Claude에게 맡기기 다시 설계"의 결정을 따른다.
+
+const PLACES = {
+  web: {
+    label: '웹 Claude',
+    can: [['고치기', true], ['push', true]],
+    open: 'https://claude.ai/code',
+  },
+  desktop: {
+    label: '데스크톱 앱',
+    can: [['고치기', true], ['push', false]],
+    open: null, // 데스크톱 앱은 주소로 열 수 없다. 붙여 넣는다
+  },
+};
+
+// 앱 종류별로 끝난 뒤 할 일
+const FINISH = {
+  web: ['main에 push하면 테스트 → 빌드 → 배포가 자동으로 된다.'],
+  desktop: [
+    'push만으로는 설치 파일이 안 나온다.',
+    '내가 설치해서 시험해야 하면 버전을 올리고, 허브의 "새 버전 빌드"를 누르라고 알려줘.',
+  ],
+  local: ['빌드와 실행은 내 컴퓨터에서만 된다. 내가 실행할 순서를 적어줘.'],
+};
+
+const workOf = (app) => ({ cloud: 'web' }[app.workOn] || app.workOn || 'web'); // 예전 값 cloud도 받는다
+
+export function claudePrompt(app, task, where, issueNo) {
+  const lines = [`할 일: ${task.trim()}`, '', `저장소: ${app.repo}`, 'CLAUDE.md와 README.md를 먼저 읽어줘.'];
+  if (where === 'desktop') {
+    lines.push('내 컴퓨터의 앱 폴더를 연결할게. 고치기 전에 내가 git pull로 최신을 받았는지 물어봐줘.');
   }
-  return head + [
-    `저장소: ${app.repo}`,
-    '저장소를 받아서 CLAUDE.md와 README.md를 먼저 읽어줘.',
-    '끝나면 main에 push해줘. 배포는 자동으로 된다.',
-  ].join('\n');
+  lines.push(...(FINISH[workOf(app)] || FINISH.web));
+  if (app.checks?.length) {
+    lines.push(`${app.checks.join(', ')}은(는) 네가 직접 확인할 수 없어. 고친 이유와 내가 확인할 순서를 답과 커밋 메시지에 적어줘.`);
+  }
+  if (issueNo) lines.push(`커밋 메시지에 "Fixes #${issueNo}"을 넣어줘. 이 할 일이 저절로 닫힌다.`);
+  lines.push('끝나면 커밋하고 push해줘. 네가 직접 못 하는 환경이면, 내가 PowerShell에서 실행할 git 명령을 알려줘.');
+  return lines.join('\n');
+}
+
+function getPlace() {
+  const p = safeGet('place');
+  return PLACES[p] ? p : 'web';
 }
 
 // "Claude에게 맡기기" 입력 칸. 쓰는 동안 화면을 다시 그리지 않는다 (글자가 지워지지 않게).
 function askPanel(app) {
   const key = `draft:${app.id}`;
-  const local = app.workOn === 'local';
+  const issueKey = `draft-issue:${app.id}`;
+  let place = getPlace();
+
   const box = el('textarea', {
     class: 'ask-text', rows: '3',
     placeholder: '무엇을 맡길까요? 예: 설정 화면 맨 아래에 앱 버전을 보여줘',
   });
   box.value = safeGet(key) || '';
+  const issueNo = safeGet(issueKey) || '';
 
+  const hint = el('div', { class: 'ask-hint' });
+  const seg = el('div', { class: 'seg', role: 'group', 'aria-label': '맡기는 곳' });
+  const goBtn = el('button', { class: 'btn pri' }, '');
   const copyBtn = el('button', { class: 'btn' }, '복사');
-  const goBtn = !local && el('button', { class: 'btn pri' }, '복사하고 Claude 열기');
+
+  const paint = () => {
+    const P = PLACES[place];
+    seg.replaceChildren(...Object.entries(PLACES).map(([id, p]) => el('button', {
+      type: 'button', class: id === place ? 'on' : '', 'aria-pressed': String(id === place),
+      onclick: () => { place = id; safeSet('place', id); paint(); },
+    }, p.label)));
+    const check = app.checks?.length ? `실행 확인 ✕ (${app.checks.slice(0, 3).join(', ')}…) → 확인 순서를 받아요` : '';
+    hint.replaceChildren(
+      ...P.can.map(([t, ok]) => el('span', { class: ok ? 'ok' : 'no' }, `${t} ${ok ? '○' : '✕'}`)),
+      !P.can[1][1] && el('span', { class: 'muted' }, 'git 명령을 알려 줘요'),
+      check && el('span', { class: 'muted' }, check),
+    );
+    goBtn.hidden = !P.open;
+    goBtn.textContent = `복사하고 ${P.label} 열기`;
+    copyBtn.className = P.open ? 'btn' : 'btn pri';
+    sync();
+  };
   const sync = () => {
     const empty = !box.value.trim();
     copyBtn.disabled = empty;
-    if (goBtn) goBtn.disabled = empty;
+    goBtn.disabled = empty;
   };
-  sync();
   box.addEventListener('input', () => { safeSet(key, box.value); sync(); });
 
+  const close = () => { state.asking = null; render(); };
   const doCopy = async (open) => {
     if (!box.value.trim()) { box.focus(); return; }
-    await copy(claudePrompt(app, box.value),
-      local ? '복사했어요. Claude 데스크톱 앱에 붙여 넣고 앱 폴더를 연결하세요' : '복사했어요. Claude에 붙여 넣고 보내세요');
-    if (open) {
-      window.open('https://claude.ai/code', '_blank', 'noopener');
-      safeSet(key, '');
-      state.asking = null;
-      render();
+    const P = PLACES[place];
+    await copy(claudePrompt(app, box.value, place, issueNo),
+      P.open ? '복사했어요. Claude에 붙여 넣고 보내세요' : '복사했어요. Claude 데스크톱 앱에서 앱 폴더를 연결하고 붙여 넣으세요');
+    if (open && P.open) {
+      window.open(P.open, '_blank', 'noopener');
+      safeSet(key, ''); safeSet(issueKey, '');
+      close();
     }
   };
   copyBtn.addEventListener('click', () => doCopy(false));
-  if (goBtn) goBtn.addEventListener('click', () => doCopy(true));
+  goBtn.addEventListener('click', () => doCopy(true));
   box.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doCopy(!local); }
-    if (e.key === 'Escape') { state.asking = null; render(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doCopy(true); }
+    if (e.key === 'Escape') close();
   });
 
+  paint();
   return el('div', { class: 'ask' },
+    el('div', { class: 'ask-row' }, seg, issueNo && el('span', { class: 'tag' }, `할 일 #${issueNo} · 끝나면 닫힘`)),
+    hint,
     box,
     el('div', { class: 'ask-row' },
       goBtn, copyBtn,
-      el('button', { class: 'btn ghost', onclick: () => { state.asking = null; render(); } }, '닫기'),
-      el('span', { class: 'muted' }, local
-        ? 'Ctrl+Enter 복사 · 내 컴퓨터 작업 앱이라 Claude 데스크톱 앱에서 한다'
-        : 'Ctrl+Enter 복사하고 열기 · 쓰던 글은 이 브라우저에 남는다'),
+      el('button', { class: 'btn ghost', onclick: () => { safeSet(issueKey, ''); close(); } }, '닫기'),
+      el('span', { class: 'muted' }, 'Ctrl+Enter · 쓰던 글은 이 브라우저에 남는다'),
     ),
   );
+}
+
+// 할 일(이슈) 하나를 골라 맡기기 칸으로 넘긴다
+function handIssue(app, issue) {
+  const text = `#${issue.number} ${issue.title}${issue.body ? `\n${issue.body}` : ''}`;
+  safeSet(`draft:${app.id}`, text);
+  safeSet(`draft-issue:${app.id}`, String(issue.number));
+  state.asking = app.id;
+  render();
+  document.querySelector('.ask-text')?.focus();
 }
 
 function localButton(app) {
@@ -144,7 +209,7 @@ function localButton(app) {
 
 function buildButtons(app) {
   const r = app.repo;
-  const local = app.workOn === 'local';
+  const local = ['desktop', 'local'].includes(workOf(app)); // 내 컴퓨터에 폴더가 있는 앱
   return [
     el('button', { class: 'btn pri', 'aria-expanded': String(state.asking === app.id), onclick: () => {
       state.asking = state.asking === app.id ? null : app.id;
@@ -199,7 +264,7 @@ function writePanel(app) {
       if (!res.ok) throw new Error(data.error || res.status);
       // 목록에 바로 더한다. 다음 갱신 때 GitHub 내용으로 맞춰진다.
       const st = (state.status[app.id] ||= { issues: [], openIssues: 0 });
-      st.issues = [{ number: data.number, title: data.title, url: data.url }, ...(st.issues || [])];
+      st.issues = [{ number: data.number, title: data.title, url: data.url, body: body.value.trim() }, ...(st.issues || [])];
       st.openIssues = (st.openIssues || 0) + 1;
       toast(`할 일 #${data.number}을 저장했어요`);
       close();
@@ -243,7 +308,8 @@ function detail(app, st) {
       issues.length
         ? el('ul', {}, issues.map((i) => el('li', {},
             el('span', { class: 'd' }, `#${i.number}`),
-            el('a', { href: i.url, target: '_blank', rel: 'noopener' }, i.title))))
+            el('a', { href: i.url, target: '_blank', rel: 'noopener' }, i.title),
+            el('button', { class: 'btn sm hand', title: '이 할 일을 Claude에게 맡겨요', onclick: () => handIssue(app, i) }, '맡기기'))))
         : el('p', { class: 'muted' }, '열린 할 일이 없어요.'),
       state.writing === app.id
         ? writePanel(app)
@@ -266,7 +332,8 @@ function card(app) {
       el('div', { class: 'head' },
         el('span', { class: 'name' }, app.name),
         kindTag,
-        app.workOn === 'local' && el('span', { class: 'tag', title: app.localReason || '' }, '내 컴퓨터 작업'),
+        workOf(app) === 'desktop' && el('span', { class: 'tag', title: '고치기는 어디서나, 확인은 설치 파일로' }, '데스크톱 앱'),
+        workOf(app) === 'local' && el('span', { class: 'tag', title: app.localReason || '' }, '내 컴퓨터 작업'),
         (app.tags || []).map((t) => el('span', { class: 'tag' }, `#${t}`)),
         el('span', { class: `st ${app.status}` }, STATUS_LABEL[app.status] || app.status),
       ),

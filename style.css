@@ -117,3 +117,13 @@ footer { margin-top: 18px; text-align: center; }
 .write .write-author { width: 140px; flex: 0 0 auto; }
 .write input:focus, .write textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .write .ask-row a.muted { margin-left: auto; font-size: 12px; }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 12.5px; font-weight: 600; padding: 5px 12px; border: 0; background: var(--card); color: var(--muted); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--accent); color: var(--accent-text); }
+.ask-hint { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; }
+.ask-hint .ok { color: var(--ok); font-weight: 600; } .ask-hint .no { color: var(--bad); font-weight: 600; }
+.btn.sm { padding: 2px 8px; font-size: 11.5px; font-weight: 600; }
+.detail li .hand { margin-left: auto; flex: 0 0 auto; }
+.btn[hidden] { display: none; }
