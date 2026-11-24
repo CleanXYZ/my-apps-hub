@@ -29,5 +29,25 @@
     "tags": [
       "qa"
     ]
+  },
+  {
+    "id": "commute-bus",
+    "name": "출퇴근 버스",
+    "summary": "3000번 출퇴근을 가장 빨리 하는 버스를 알려 주는 휴대폰 웹앱",
+    "kind": "worker",
+    "status": "active",
+    "repo": "CleanXYZ/commute-bus",
+    "deploy": {
+      "target": "cf-worker",
+      "project": "commute-bus"
+    },
+    "workOn": "cloud",
+    "run": "npm run dev",
+    "envNames": [
+      "GBIS_KEY"
+    ],
+    "tags": [
+      "생활"
+    ]
   }
 ]

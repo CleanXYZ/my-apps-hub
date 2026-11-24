@@ -17,8 +17,13 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm ci --ignore-scripts
-        if: hashFiles('package-lock.json') != ''
+      - name: 설치
+        run: npm ci || npm install
+
+      - name: 테스트와 빌드 (스크립트가 있을 때만)
+        run: |
+          npm test --if-present
+          npm run build --if-present
 
       - uses: cloudflare/wrangler-action@v3
         with:

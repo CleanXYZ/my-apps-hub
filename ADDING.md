@@ -64,3 +64,4 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - v0.1 (2026-11-24): 처음 만들었다.
 - v0.1 (2026-11-24): 허브 자신(`my-apps-hub`)을 첫 앱으로 등록했다. GitHub Pages로 배포하므로 `deploy` 칸은 비운다.
 - v0.1 (2026-11-24): qa-shot 등록. Tauri 데스크톱 앱이라 Cloudflare 대신 `release.yml`(설치 파일 자동 빌드)을 넣었다. `Claude outputs/` 시안은 .gitignore로 뺐다. 기존 README, HISTORY가 좋아서 README에는 자동 빌드 절만 더했다.
+- v0.1 (2026-11-24): commute-bus 등록. Worker + assets 앱이라 배포 전에 `npm test`, `npm run build`가 필요했다. package-lock.json이 없어서 `npm ci || npm install`로 설치한다. 키는 .dev.vars라서 `.dev.vars.example`을 만들었다. 이미 Cloudflare에 있는 GBIS_KEY는 그대로 쓴다.
