@@ -37,6 +37,7 @@
     "kind": "worker",
     "status": "active",
     "repo": "CleanXYZ/commute-bus",
+    "url": "https://commute-bus.hunlab.workers.dev/",
     "deploy": {
       "target": "cf-worker",
       "project": "commute-bus"
