@@ -1,0 +1,29 @@
+# hub-status Worker 배포 ("지금 갱신" 단추용 서버)
+# 언제: worker/ 나 scripts/core.mjs가 바뀌어 main에 push될 때, 또는 Run workflow
+name: worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/**'
+      - 'scripts/core.mjs'
+      - '.github/workflows/worker.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy
+          secrets: |
+            HUB_TOKEN
+        env:
+          HUB_TOKEN: ${{ secrets.HUB_TOKEN }}

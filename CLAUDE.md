@@ -7,6 +7,8 @@
 - `apps.json`의 `envNames`에는 키 이름만 적는다.
 - 내 컴퓨터의 폴더 경로는 `apps.json`에 넣지 않는다. 대시보드가 브라우저(localStorage)에 따로 기억한다.
 - `data/status.json`은 Actions가 만든다. 손으로 고치지 않는다.
+- 상황 모으기 코드는 `scripts/core.mjs` 하나다. 06:00 갱신(collect.mjs)과 "지금 갱신"(worker/index.js)이 같이 쓴다. 한쪽만 고치지 않는다.
+- hub-status Worker는 status.json과 같은 내용만 돌려준다. 그보다 많은 정보(코드 내용, 비밀값)를 돌려주게 바꾸지 않는다.
 - 앱을 추가하면 `ADDING.md`의 "바뀐 기록"에 예외와 고친 점을 한 줄 적는다.
 - 커밋 메시지는 한국어로 짧게 쓴다. 키나 사내 정보를 쓰지 않는다.
 

@@ -4,6 +4,8 @@
 const KIND_LABEL = { page: 'Page', worker: 'Worker', program: 'Program', app: 'App' };
 const STATUS_LABEL = { active: '사용 중', paused: '보류', retired: '폐기' };
 const TABS = [['all', '전체'], ['active', '사용 중'], ['paused', '보류'], ['retired', '폐기']];
+// "지금 갱신"이 부르는 서버 (worker/index.js). 비공개 저장소 열쇠는 거기에만 있다.
+const LIVE_URL = 'https://hub-status.hunlab.workers.dev/status';
 
 const state = { apps: [], status: {}, generatedAt: null, tab: 'all', query: '', open: new Set(), asking: null };
 
@@ -262,15 +264,35 @@ function render() {
   }
 
   document.getElementById('footer').textContent = state.generatedAt
-    ? `상황 정보: ${new Date(state.generatedAt).toLocaleString('ko-KR')} 기준 · 매일 06:00 갱신`
+    ? `상황 정보: ${new Date(state.generatedAt).toLocaleString('ko-KR')} 기준 · 매일 06:00 자동 갱신 · ↻로 바로 갱신`
     : '상황 정보는 GitHub Actions가 매일 06:00에 모아요.';
+}
+
+async function refreshLive() {
+  const btn = document.getElementById('refresh');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = '↻ 갱신 중…';
+  try {
+    const res = await fetch(LIVE_URL, { cache: 'no-store' });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || res.status);
+    state.status = data.apps || {};
+    state.generatedAt = data.generatedAt;
+    render();
+    toast('모든 앱을 새로 읽었어요');
+  } catch (err) {
+    toast(`갱신하지 못했어요 (${err.message}). 잠시 뒤 다시 눌러 주세요`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↻ 지금 갱신';
+  }
 }
 
 async function load() {
   state.tab = safeGet('tab') || 'all';
   document.getElementById('search').addEventListener('input', (e) => { state.query = e.target.value; render(); });
-  document.getElementById('refresh').addEventListener('click', () =>
-    toast('GitHub에서 Run workflow를 누르고, 1~2분 뒤 이 화면을 새로고침하세요'));
+  document.getElementById('refresh').addEventListener('click', refreshLive);
 
   const [apps, status] = await Promise.all([
     fetch('apps.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => []),

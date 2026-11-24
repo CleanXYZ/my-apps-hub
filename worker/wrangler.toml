@@ -1,0 +1,6 @@
+name = "hub-status"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# HUB_TOKEN은 여기에 적지 않는다.
+# GitHub Actions(.github/workflows/worker.yml)가 저장소 Secrets의 HUB_TOKEN을 Worker 비밀값으로 넣는다.
