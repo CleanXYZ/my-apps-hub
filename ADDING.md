@@ -19,6 +19,7 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
    - `templates/gitignore`를 `.gitignore`로 복사한다. 이미 있으면 빠진 줄만 더한다.
    - `.env.example`에는 키 이름만 적는다. 값은 비운다.
 4. **저장소를 만든다.**
+   - **먼저 `gh repo view CleanXYZ/<id>`로 같은 이름이 이미 있는지 확인한다.** 있으면 새로 만들지 않고, `git clone`으로 받아 바탕화면 폴더와 비교한 뒤 합친다.
    - 이미 GitHub에 있으면 건너뛴다.
    - 없으면 비공개로 만들고 push한다: `gh repo create CleanXYZ/<id> --private --source . --push`
 5. **배포 자동화를 넣는다 (Cloudflare 앱만).**
@@ -83,3 +84,4 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - v0.2 (2026-11-24): dictate(음성 받아쓰기) 등록. 폴더 이름이 한글과 공백이라 저장소 id는 영어(`dictate`)로 정했다. 한 저장소에 Python(지금 쓰는 것)과 `dictate-rs/`(옮기는 중) 두 버전을 둔다. dictate-rs README가 없는 release.yml을 설명하고 있어서 "아직 없다"로 고쳤다.
 - v0.2 (2026-11-24): 모든 Cloudflare 배포를 wrangler-action@v4로 올렸다 (Node 20 경고 해결).
 - v0.2 (2026-11-24): pages.yml을 upload-pages-artifact@v5, deploy-pages@v5로, qa-shot release.yml을 checkout@v5, setup-node@v5, Node 22로 올렸다. 이제 Node 20 경고가 나오는 곳은 남은 외부 부품(tauri-action 등)뿐이다.
+- v0.2 (2026-11-24): dictate는 GitHub에 이미 있던 저장소(Rust, 더 새 코드, 빌드 자동화)였다. 바탕화면에서 새로 `git init`해서 사본이 둘이 됐다. GitHub 쪽을 기준으로 Python 버전을 `python/`에 넣어 합쳤다. 빌드가 30분짜리라 `main` push 때는 돌지 않게 고쳤다. 4단계에 "이미 있는지 먼저 확인"을 더했다.
