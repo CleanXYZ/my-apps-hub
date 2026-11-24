@@ -67,5 +67,23 @@
     "tags": [
       "도구"
     ]
+  },
+  {
+    "id": "mvpbest",
+    "name": "MVP작 계산기",
+    "summary": "MVP작을 나눠 할 때 캐시·마일리지 아이템 지출과 경매장 판매가를 기록해 순손익을 보는 계산기",
+    "kind": "page",
+    "status": "active",
+    "repo": "CleanXYZ/mvpbest",
+    "url": "https://mvpbest.pages.dev",
+    "deploy": {
+      "target": "cf-pages",
+      "project": "mvpbest"
+    },
+    "workOn": "cloud",
+    "run": "npx wrangler pages dev public",
+    "tags": [
+      "메이플"
+    ]
   }
 ]

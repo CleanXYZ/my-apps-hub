@@ -72,6 +72,9 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - **폴더 이름이 한글이거나 공백이 있으면** 저장소 id는 짧은 영어로 정한다. 폴더 이름은 바꾸지 않아도 된다.
 - **새 Worker에 비밀값을 넣을 때는 배포를 먼저 한다.** wrangler-action의 `secrets:`는 명령보다 먼저 돌아서, 아직 없는 Worker에는 실패한다. 배포 단계와 비밀값 단계를 나눈다 (worker.yml 참고).
 - **wrangler-action은 `@v4`를 쓴다.** v3은 옛 wrangler(3.90)를 깔고 "Node.js 20 is deprecated" 경고를 낸다. v4는 기본으로 wrangler 4 최신을 쓴다.
+- **원본이 없는 Cloudflare Pages는 배포본에서 되찾는다.** `curl.exe -L -o 파일 주소`로 받는다 (PowerShell `Invoke-WebRequest`는 진행 막대 버그로 0바이트가 될 수 있다). 사이트 파일은 `public/`에 둔다.
+- **코드에 `/api/...` 호출이 있으면 Pages Functions가 숨어 있다.** Functions 코드는 내려받을 수 없다. 화면만 다시 배포하면 서버 기능이 사라지므로, 먼저 데이터를 백업하고, 바인딩(대시보드 → 설정 → 바인딩)과 KV 키(`npx wrangler kv key list --namespace-id <id> --remote`)를 확인해 `functions/`를 새로 만든다.
+- **배포 전에 test 브랜치로 먼저 올려 본다:** `npx wrangler pages deploy public --project-name=<이름> --branch=test` → `https://test.<이름>.pages.dev`에서 확인.
 - **Secrets만 고쳤으면** 실패한 배포를 `gh run rerun --failed -R CleanXYZ/<id>`로 다시 돌린다.
 
 ## 바뀐 기록
@@ -85,3 +88,4 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - v0.2 (2026-11-24): 모든 Cloudflare 배포를 wrangler-action@v4로 올렸다 (Node 20 경고 해결).
 - v0.2 (2026-11-24): pages.yml을 upload-pages-artifact@v5, deploy-pages@v5로, qa-shot release.yml을 checkout@v5, setup-node@v5, Node 22로 올렸다. 이제 Node 20 경고가 나오는 곳은 남은 외부 부품(tauri-action 등)뿐이다.
 - v0.2 (2026-11-24): dictate는 GitHub에 이미 있던 저장소(Rust, 더 새 코드, 빌드 자동화)였다. 바탕화면에서 새로 `git init`해서 사본이 둘이 됐다. GitHub 쪽을 기준으로 Python 버전을 `python/`에 넣어 합쳤다. 빌드가 30분짜리라 `main` push 때는 돌지 않게 고쳤다. 4단계에 "이미 있는지 먼저 확인"을 더했다.
+- v0.2 (2026-11-24): mvpbest 등록. 원본이 없어 배포본에서 되찾았다 (React 빌드 파일, 원래 JSX 없음). Pages Functions(`/api/mvp-data`, KV `MVP_KV`의 키 `shared-data`)를 같은 모양으로 새로 만들었다.
