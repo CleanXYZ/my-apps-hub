@@ -1,0 +1,21 @@
+# 비밀값 — 절대 올리지 않는다
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# 의존성과 빌드 결과
+node_modules/
+dist/
+build/
+.wrangler/
+__pycache__/
+*.pyc
+.venv/
+
+# 운영체제와 편집기
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json

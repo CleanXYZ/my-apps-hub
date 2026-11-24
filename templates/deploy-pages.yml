@@ -1,0 +1,27 @@
+# Cloudflare Pages 배포 (앱 저장소의 .github/workflows/deploy.yml로 복사한다)
+# __PROJECT__ : Cloudflare Pages 프로젝트 이름
+# __DIR__     : 올릴 폴더 (예: ./  dist  build)
+# 빌드가 필요하면 "빌드" 단계의 주석을 푼다.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # 허브의 "새 버전 배포" 버튼
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # - uses: actions/setup-node@v4
+      #   with: { node-version: 20 }
+      # - name: 빌드
+      #   run: npm ci && npm run build
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy __DIR__ --project-name=__PROJECT__ --branch=main

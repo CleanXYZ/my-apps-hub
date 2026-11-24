@@ -1,0 +1,27 @@
+# Cloudflare Worker 배포 (앱 저장소의 .github/workflows/deploy.yml로 복사한다)
+# wrangler.toml에 적힌 이름과 설정으로 올린다.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # 허브의 "새 버전 배포" 버튼
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci --ignore-scripts
+        if: hashFiles('package-lock.json') != ''
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

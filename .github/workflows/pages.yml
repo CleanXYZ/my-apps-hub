@@ -1,0 +1,54 @@
+# 대시보드를 만들어 GitHub Pages에 올린다.
+# 언제: main에 push할 때, 매일 06:00 KST, 그리고 Actions 화면의 "Run workflow" 버튼
+name: pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 21 * * *'   # UTC 21:00 = 한국 시간 06:00
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 앱별 상황 모으기
+        run: node scripts/collect.mjs
+        env:
+          HUB_TOKEN: ${{ secrets.HUB_TOKEN }}   # 없으면 공개 저장소만 읽힌다
+
+      - name: 공개할 파일만 모으기
+        run: |
+          mkdir -p _site/data
+          cp index.html app.js style.css apps.json _site/
+          cp data/status.json _site/data/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

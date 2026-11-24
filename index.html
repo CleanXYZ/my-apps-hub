@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>내 앱 허브</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" type="module" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="title">
+      <h1>내 앱</h1>
+      <span id="summary" class="muted">불러오는 중…</span>
+    </div>
+    <input id="search" type="search" placeholder="이름, 설명, 태그 검색" autocomplete="off">
+  </header>
+
+  <nav id="tabs" class="tabs" aria-label="상태 필터"></nav>
+
+  <main id="list" class="list"></main>
+
+  <details class="checklist">
+    <summary>피시방 체크리스트</summary>
+    <ul>
+      <li><b>들어갈 때</b> · 시크릿 창을 연다. GitHub에 2단계 인증으로 로그인한다.</li>
+      <li><b>작업할 때</b> · 파일을 내려받지 않는다. 수정은 Claude에게 맡긴다.</li>
+      <li><b>나올 때</b> · GitHub, Cloudflare, Claude에서 로그아웃하고 창을 닫는다.</li>
+    </ul>
+  </details>
+
+  <footer class="muted" id="footer"></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
