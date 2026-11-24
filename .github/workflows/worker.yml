@@ -1,6 +1,6 @@
 # hub-status Worker 배포 ("지금 갱신" 단추용 서버)
 # 언제: worker/ 나 scripts/core.mjs가 바뀌어 main에 push될 때, 또는 Run workflow
-# 순서: 서버를 먼저 올리고, 그다음 열쇠(HUB_TOKEN)를 넣는다.
+# 순서: 서버를 먼저 올리고, 그다음 열쇠(HUB_TOKEN, HUB_ISSUE_TOKEN)를 넣는다.
 #       처음에는 서버가 없어서, 열쇠를 먼저 넣으려 하면 실패한다.
 name: worker
 
@@ -27,7 +27,7 @@ jobs:
           workingDirectory: worker
           command: deploy
 
-      - name: 열쇠 넣기 (HUB_TOKEN)
+      - name: 열쇠 넣기 (읽기 HUB_TOKEN, 이슈 쓰기 HUB_ISSUE_TOKEN)
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -35,6 +35,8 @@ jobs:
           workingDirectory: worker
           secrets: |
             HUB_TOKEN
+            HUB_ISSUE_TOKEN
           command: secret list
         env:
           HUB_TOKEN: ${{ secrets.HUB_TOKEN }}
+          HUB_ISSUE_TOKEN: ${{ secrets.HUB_ISSUE_TOKEN }}

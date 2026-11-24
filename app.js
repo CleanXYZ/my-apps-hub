@@ -5,9 +5,10 @@ const KIND_LABEL = { page: 'Page', worker: 'Worker', program: 'Program', app: 'A
 const STATUS_LABEL = { active: '사용 중', paused: '보류', retired: '폐기' };
 const TABS = [['all', '전체'], ['active', '사용 중'], ['paused', '보류'], ['retired', '폐기']];
 // "지금 갱신"이 부르는 서버 (worker/index.js). 비공개 저장소 열쇠는 거기에만 있다.
-const LIVE_URL = 'https://hub-status.hunlab.workers.dev/status';
+const HUB_API = 'https://hub-status.hunlab.workers.dev';
+const LIVE_URL = `${HUB_API}/status`;
 
-const state = { apps: [], status: {}, generatedAt: null, tab: 'all', query: '', open: new Set(), asking: null };
+const state = { apps: [], status: {}, generatedAt: null, tab: 'all', query: '', open: new Set(), asking: null, writing: null };
 
 // ── 작은 도우미 ─────────────────────────────────────────────
 function el(tag, attrs = {}, ...children) {
@@ -170,6 +171,60 @@ function deployBadge(app, st) {
   return el('span', { class: 'run' }, `◐ ${word} 중`);
 }
 
+// "+ 할 일 적기" 입력 칸. 저장하면 hub-status 서버가 그 앱 저장소에 이슈를 만든다.
+// 누구나 쓸 수 있고, 작성자 이름이 이슈 끝에 남는다. 쓰는 동안 화면을 다시 그리지 않는다.
+function writePanel(app) {
+  const who = el('input', { class: 'write-author', type: 'text', maxlength: '40', placeholder: '작성자 이름' });
+  who.value = safeGet('author') || '';
+  const title = el('input', { class: 'write-title', type: 'text', maxlength: '200', placeholder: '할 일 제목 (예: 모바일에서 버튼이 잘린다)' });
+  const body = el('textarea', { class: 'write-body', rows: '3', maxlength: '5000', placeholder: '내용 (선택)' });
+  const save = el('button', { class: 'btn pri' }, '저장');
+  const sync = () => { save.disabled = !title.value.trim() || !who.value.trim(); };
+  [who, title].forEach((x) => x.addEventListener('input', sync));
+  sync();
+
+  const close = () => { state.writing = null; render(); };
+  const submit = async () => {
+    if (save.disabled) return;
+    save.disabled = true;
+    save.textContent = '저장 중…';
+    safeSet('author', who.value.trim());
+    try {
+      const res = await fetch(`${HUB_API}/issue`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ app: app.id, title: title.value, body: body.value, author: who.value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || res.status);
+      // 목록에 바로 더한다. 다음 갱신 때 GitHub 내용으로 맞춰진다.
+      const st = (state.status[app.id] ||= { issues: [], openIssues: 0 });
+      st.issues = [{ number: data.number, title: data.title, url: data.url }, ...(st.issues || [])];
+      st.openIssues = (st.openIssues || 0) + 1;
+      toast(`할 일 #${data.number}을 저장했어요`);
+      close();
+    } catch (err) {
+      toast(`저장하지 못했어요 (${err.message})`);
+      save.disabled = false;
+      save.textContent = '저장';
+    }
+  };
+  save.addEventListener('click', submit);
+  [title, body].forEach((x) => x.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); }
+    if (e.key === 'Escape') close();
+  }));
+
+  return el('div', { class: 'write' },
+    title, body,
+    el('div', { class: 'ask-row' },
+      who, save,
+      el('button', { class: 'btn ghost', onclick: close }, '취소'),
+      el('a', { class: 'muted', href: `https://github.com/${app.repo}/issues/new`, target: '_blank', rel: 'noopener' }, 'GitHub에서 적기'),
+    ),
+  );
+}
+
 function detail(app, st) {
   const commits = st?.recentCommits || [];
   const issues = st?.issues || [];
@@ -190,7 +245,13 @@ function detail(app, st) {
             el('span', { class: 'd' }, `#${i.number}`),
             el('a', { href: i.url, target: '_blank', rel: 'noopener' }, i.title))))
         : el('p', { class: 'muted' }, '열린 할 일이 없어요.'),
-      el('p', {}, el('a', { class: 'btn', href: `https://github.com/${app.repo}/issues/new`, target: '_blank', rel: 'noopener' }, '+ 할 일 적기')),
+      state.writing === app.id
+        ? writePanel(app)
+        : el('p', {}, el('button', { class: 'btn', onclick: () => {
+            state.writing = app.id;
+            render();
+            document.querySelector('.write-title')?.focus();
+          } }, '+ 할 일 적기')),
     ),
   );
 }

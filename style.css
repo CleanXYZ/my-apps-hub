@@ -107,3 +107,13 @@ footer { margin-top: 18px; text-align: center; }
 .ask-row .muted { margin-left: auto; font-size: 12px; }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+
+.write { display: grid; gap: 8px; margin-top: 8px; }
+.write input, .write textarea {
+  width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--card); color: var(--text); font: inherit; font-size: 14px;
+}
+.write textarea { resize: vertical; min-height: 64px; }
+.write .write-author { width: 140px; flex: 0 0 auto; }
+.write input:focus, .write textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.write .ask-row a.muted { margin-left: auto; font-size: 12px; }

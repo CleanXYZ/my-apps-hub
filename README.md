@@ -13,7 +13,7 @@
 | `index.html`, `app.js`, `style.css` | 대시보드 화면 | Claude |
 | `scripts/core.mjs` | 앱별 커밋, 이슈, 배포 상태를 모으는 공통 코드 | Claude |
 | `scripts/collect.mjs` | 매일 06:00 `data/status.json`을 만든다 | Claude |
-| `worker/` | "지금 갱신" 단추가 부르는 서버 `hub-status` (Cloudflare Worker) | Claude |
+| `worker/` | 서버 `hub-status` (Cloudflare Worker). "지금 갱신"과 "할 일 적기"가 부른다 | Claude |
 | `.github/workflows/pages.yml` | 상황을 모으고 Pages에 올린다 (push, 매일 06:00, 버튼) | Claude |
 | `.github/workflows/worker.yml` | `worker/`가 바뀌면 hub-status를 Cloudflare에 올린다 | Claude |
 | `ADDING.md` | 앱 추가 절차 | Claude가 앱 추가 때마다 고친다 |
@@ -29,6 +29,7 @@
    - 없으면 공개 저장소 정보만 보인다.
    - 같은 토큰을 hub-status Worker도 쓴다. worker.yml이 배포할 때 Worker 비밀값으로 넣는다.
 3. Secrets → `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (hub-status 배포용)
+4. Secrets → `HUB_ISSUE_TOKEN` ("할 일 적기"용). fine-grained 토큰, All repositories, **Issues = Read and write**만 준다.
 
 ## 앱 추가
 
