@@ -26,6 +26,8 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
    - Worker: `templates/deploy-worker.yml` → `.github/workflows/deploy.yml`
    - `__PROJECT__`, `__DIR__`를 바꾼다.
    - 저장소 Secrets에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`를 넣는다 (사용자가 직접).
+   - **설치 파일을 만드는 데스크톱 앱(Tauri)**은 `templates/release-tauri.yml` → `.github/workflows/release.yml`, apps.json에 `"release": { "workflow": "release.yml" }`.
+   - `.github` 폴더는 원격 도구로 쓸 수 없다. `_setup/`에 넣고 사용자가 명령으로 옮긴다.
 6. **`apps.json`에 한 줄을 더한다.**
    - 같은 `id`가 있으면 덮어쓰지 않고 사용자에게 묻는다.
    - 내 컴퓨터에서만 작업할 수 있으면 `workOn: "local"`과 `localReason`을 적는다.
@@ -53,6 +55,7 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 
 - `kind`: `page` | `worker` | `program` | `app`
 - `status`: `active`(사용 중) | `paused`(보류) | `retired`(폐기)
+- `release`: 설치 파일을 만드는 앱만. 허브에 "새 버전 빌드", "설치 파일 받기" 단추가 생긴다
 - `workOn`: `cloud`(어디서나 Claude에게 맡김) | `local`(내 컴퓨터 필요)
 - `envNames`: 키 **이름만**. 값은 절대 넣지 않는다. 이 파일은 공개된다.
 
@@ -60,3 +63,4 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 
 - v0.1 (2026-11-24): 처음 만들었다.
 - v0.1 (2026-11-24): 허브 자신(`my-apps-hub`)을 첫 앱으로 등록했다. GitHub Pages로 배포하므로 `deploy` 칸은 비운다.
+- v0.1 (2026-11-24): qa-shot 등록. Tauri 데스크톱 앱이라 Cloudflare 대신 `release.yml`(설치 파일 자동 빌드)을 넣었다. `Claude outputs/` 시안은 .gitignore로 뺐다. 기존 README, HISTORY가 좋아서 README에는 자동 빌드 절만 더했다.

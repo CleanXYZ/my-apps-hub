@@ -9,6 +9,25 @@
     "url": "https://cleanxyz.github.io/my-apps-hub/",
     "workOn": "cloud",
     "run": "npx serve .",
-    "tags": ["허브"]
+    "tags": [
+      "허브"
+    ]
+  },
+  {
+    "id": "qa-shot",
+    "name": "QA Shot",
+    "summary": "Redmine에 올릴 캡처에 네모, 화살표, 번호, 요청 배지를 그리는 Windows 프로그램",
+    "kind": "program",
+    "status": "active",
+    "repo": "CleanXYZ/qa-shot",
+    "release": {
+      "workflow": "release.yml"
+    },
+    "workOn": "local",
+    "localReason": "Tauri(Rust) Windows 앱이라 내 컴퓨터에서 빌드하고 실행한다",
+    "run": "npm run tauri dev",
+    "tags": [
+      "qa"
+    ]
   }
 ]

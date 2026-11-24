@@ -21,12 +21,15 @@ async function gh(path) {
   return res.json();
 }
 
+// 배포(Cloudflare)나 빌드(설치 파일) 워크플로 이름
+const workflowOf = (app) => (app.deploy ? 'deploy.yml' : app.release?.workflow || null);
+
 async function collectOne(app) {
   const r = app.repo;
   const [commits, issues, runs] = await Promise.all([
     gh(`/repos/${r}/commits?per_page=5`),
     gh(`/repos/${r}/issues?state=open&per_page=20`),
-    app.deploy ? gh(`/repos/${r}/actions/workflows/deploy.yml/runs?per_page=1`) : null,
+    workflowOf(app) ? gh(`/repos/${r}/actions/workflows/${workflowOf(app)}/runs?per_page=1`) : null,
   ]);
 
   const recentCommits = (commits || []).map((c) => ({

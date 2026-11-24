@@ -1,0 +1,41 @@
+# Windows 설치 파일(.exe)을 만들어 GitHub Releases에 올린다.
+# 언제: v로 시작하는 태그를 push할 때 (예: v0.2.1), 또는 허브의 "새 버전 빌드" 버튼
+# 태그 이름은 tauri.conf.json의 version으로 정한다 (v__VERSION__).
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'QA Shot v__VERSION__'
+          releaseBody: '설치 파일을 받아 실행한다. 바뀐 점은 HISTORY.md를 본다.'
+          releaseDraft: false
+          prerelease: false

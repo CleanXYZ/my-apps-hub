@@ -96,6 +96,8 @@ function buildButtons(app) {
   return [
     el('button', { class: 'btn pri', onclick: () => copy(claudePrompt(app), '시작 문장을 복사했어요. Claude에 붙여 넣으세요') }, 'Claude에게 맡기기'),
     app.deploy && el('a', { class: 'btn', href: `https://github.com/${r}/actions/workflows/deploy.yml`, target: '_blank', rel: 'noopener' }, '새 버전 배포'),
+    app.release && el('a', { class: 'btn', href: `https://github.com/${r}/actions/workflows/${app.release.workflow}`, target: '_blank', rel: 'noopener' }, '새 버전 빌드'),
+    app.release && el('a', { class: 'btn', href: `https://github.com/${r}/releases/latest`, target: '_blank', rel: 'noopener' }, '설치 파일 받기'),
     app.url && el('a', { class: 'btn', href: app.url, target: '_blank', rel: 'noopener' }, '사이트 열기'),
     el('a', { class: 'btn', href: `https://github.com/${r}`, target: '_blank', rel: 'noopener' }, '저장소'),
     local && el('button', { class: 'btn', onclick: () => copy(`git clone https://github.com/${r}.git`, 'git clone 명령을 복사했어요') }, '내려받기 명령 복사'),
@@ -104,12 +106,13 @@ function buildButtons(app) {
 }
 
 // ── 카드 ───────────────────────────────────────────────────
-function deployBadge(st) {
+function deployBadge(app, st) {
   const d = st?.lastDeploy;
   if (!d) return null;
-  if (d.result === 'success') return el('span', { class: 'ok' }, `● 배포됨 · ${ago(d.at)}`);
-  if (d.result === 'failure') return el('a', { class: 'bad', href: d.url, target: '_blank', rel: 'noopener' }, '✕ 배포 실패 · 로그 보기');
-  return el('span', { class: 'run' }, '◐ 배포 중');
+  const word = app.release ? '빌드' : '배포';
+  if (d.result === 'success') return el('span', { class: 'ok' }, `● ${word}됨 · ${ago(d.at)}`);
+  if (d.result === 'failure') return el('a', { class: 'bad', href: d.url, target: '_blank', rel: 'noopener' }, `✕ ${word} 실패 · 로그 보기`);
+  return el('span', { class: 'run' }, `◐ ${word} 중`);
 }
 
 function detail(app, st) {
@@ -155,7 +158,7 @@ function card(app) {
       el('div', { class: 'meta' },
         el('span', {}, `커밋 ${ago(st?.lastCommit?.date)}`),
         el('span', {}, `할 일 ${st?.openIssues ?? '-'}`),
-        deployBadge(st),
+        deployBadge(app, st),
         app.run && el('span', {}, '실행 ', el('code', {}, app.run)),
         app.envNames?.length && el('span', {}, '키 ', app.envNames.map((n) => el('code', {}, n))),
       ),
