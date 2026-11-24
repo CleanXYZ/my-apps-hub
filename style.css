@@ -33,8 +33,10 @@ code { font: 12.5px ui-monospace, Consolas, monospace; background: var(--chip); 
 .top { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; justify-content: space-between; }
 .title { display: flex; gap: 10px; align-items: baseline; }
 h1 { margin: 0; font-size: 26px; }
+.tools { display: flex; gap: 8px; flex: 1 1 280px; max-width: 420px; }
+#refresh { white-space: nowrap; display: inline-flex; align-items: center; }
 #search {
-  flex: 1 1 220px; max-width: 320px; padding: 8px 12px; border-radius: 8px;
+  flex: 1 1 auto; min-width: 0; padding: 8px 12px; border-radius: 8px;
   border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit;
 }
 

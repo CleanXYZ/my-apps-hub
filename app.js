@@ -269,6 +269,8 @@ function render() {
 async function load() {
   state.tab = safeGet('tab') || 'all';
   document.getElementById('search').addEventListener('input', (e) => { state.query = e.target.value; render(); });
+  document.getElementById('refresh').addEventListener('click', () =>
+    toast('GitHub에서 Run workflow를 누르고, 1~2분 뒤 이 화면을 새로고침하세요'));
 
   const [apps, status] = await Promise.all([
     fetch('apps.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => []),
