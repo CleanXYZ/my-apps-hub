@@ -20,6 +20,8 @@
 - 웹의 Claude는 브랜치나 PR 없이 `main`에 바로 push한다 (사용자가 정했다). 테스트가 통과해야 배포된다. 문제가 생기면 `git revert`로 되돌린다.
 - Cloudflare 앱은 main에 push하면 자동 배포하고, `workflow_dispatch` 버튼으로도 배포한다.
 - 앱 추가는 지금은 Claude가 한다. 절차가 굳으면 Node 명령어 도구 `hub add`로 만든다.
+- 회사 업무 도구(바탕화면 `autotest`, `claude` 폴더의 ExcelFinder, QA_GM_Panel 등)는 허브와 GitHub에 올리지 않는다 (사용자가 정했다).
+- 커밋 작성자 이메일은 GitHub 숨김 메일(noreply)을 쓴다. 회사 메일을 쓰지 않는다.
 
 ## 확인
 - 화면을 바꾸면 `npx serve .`로 띄워서 빈 목록, 앱 여러 개, 휴대폰 폭을 확인한다.
