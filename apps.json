@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "my-apps-hub",
+    "name": "내 앱 허브",
+    "summary": "모든 앱을 한눈에 보고 Claude에게 수정을 맡기는 대시보드",
+    "kind": "page",
+    "status": "active",
+    "repo": "CleanXYZ/my-apps-hub",
+    "url": "https://cleanxyz.github.io/my-apps-hub/",
+    "workOn": "cloud",
+    "run": "npx serve .",
+    "tags": ["허브"]
+  }
+]
