@@ -70,7 +70,7 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - **Cloudflare 토큰**: "Cloudflare Workers 편집" 정책. 영역 정책은 workers.dev만 쓰면 지워도 된다. 계정 정책은 내 계정을 골라야 한다. IP 필터는 비운다.
 - **폴더 이름이 한글이거나 공백이 있으면** 저장소 id는 짧은 영어로 정한다. 폴더 이름은 바꾸지 않아도 된다.
 - **새 Worker에 비밀값을 넣을 때는 배포를 먼저 한다.** wrangler-action의 `secrets:`는 명령보다 먼저 돌아서, 아직 없는 Worker에는 실패한다. 배포 단계와 비밀값 단계를 나눈다 (worker.yml 참고).
-- **`package.json`이 없는 폴더**에서 wrangler-action은 예전 wrangler(3.90)를 깐다. `wranglerVersion`을 적어 둔다.
+- **wrangler-action은 `@v4`를 쓴다.** v3은 옛 wrangler(3.90)를 깔고 "Node.js 20 is deprecated" 경고를 낸다. v4는 기본으로 wrangler 4 최신을 쓴다.
 - **Secrets만 고쳤으면** 실패한 배포를 `gh run rerun --failed -R CleanXYZ/<id>`로 다시 돌린다.
 
 ## 바뀐 기록
@@ -81,3 +81,4 @@ Claude와 나중에 만들 `hub add`는 같은 순서를 따른다.
 - v0.1 (2026-11-24): commute-bus 등록. Worker + assets 앱이라 배포 전에 `npm test`, `npm run build`가 필요했다. package-lock.json이 없어서 `npm ci || npm install`로 설치한다. 키는 .dev.vars라서 `.dev.vars.example`을 만들었다. 이미 Cloudflare에 있는 GBIS_KEY는 그대로 쓴다.
 - v0.2 (2026-11-24): commute-bus 첫 배포에서 계정 ID 오류(7003)와 PowerShell 실행 정책을 겪고 "자주 막히는 것"을 만들었다. 템플릿을 Node 22, checkout@v5, setup-node@v5로 올렸다.
 - v0.2 (2026-11-24): dictate(음성 받아쓰기) 등록. 폴더 이름이 한글과 공백이라 저장소 id는 영어(`dictate`)로 정했다. 한 저장소에 Python(지금 쓰는 것)과 `dictate-rs/`(옮기는 중) 두 버전을 둔다. dictate-rs README가 없는 release.yml을 설명하고 있어서 "아직 없다"로 고쳤다.
+- v0.2 (2026-11-24): 모든 Cloudflare 배포를 wrangler-action@v4로 올렸다 (Node 20 경고 해결).
